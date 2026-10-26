@@ -26,6 +26,7 @@
         .checkbox-row input { width: auto; margin: 0; }
         .checkbox-row label { display: inline; margin: 0; font-size: 0.8rem; cursor: pointer; }
         .backup-row { display: flex; gap: 6px; margin-bottom: 10px; }
+        .total-footer { margin-top: 8px; border-top: 2px solid #cbd5e1; padding-top: 8px; text-align: left; font-weight: bold; font-size: 0.95krem; color: #0f172a; }
     </style>
 </head>
 <body>
@@ -90,10 +91,11 @@
         </table>
     </div>
 
-    <!-- רשימת הפריטים ויומן הדיווחים ממוקמים כעת בוודאות בסוף העמוד מתחת לכל הרכיבים -->
+    <!-- יומן דיווחים בתחתית המוחלטת של העמוד -->
     <div class="card">
-        <h3 id="totalTitle" style="margin: 0 0 6px 0; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; font-size: 0.9rem; color: #0f172a;">יומן דיווחים (סה"כ: 0 ₪)</h3>
+        <h3 style="margin: 0 0 6px 0; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; font-size: 0.9rem; color: #0f172a;">יומן דיווחים</h3>
         <div id="entriesList"></div>
+        <div id="totalFooter" class="total-footer">סה"כ כללי: 0 ₪</div>
     </div>
 </div>
 
@@ -134,6 +136,7 @@
         const key = sessionSelect.value;
         if (!key || !CONFIG[key]) {
             coworkerSection.classList.add('hidden');
+            countLabel.innerText = 'כמות';
             return;
         }
         const item = CONFIG[key];
@@ -191,8 +194,11 @@
         entries.push(newEntry);
         sortAndSave();
 
-        // איפוס בחירת סוג הססיה חזרה למצב "בחר"
+        // איפוס בחירת סוג הססיה חזרה לברירת המחדל "בחר"
         sessionSelect.value = "";
+        document.getElementById('countInput').value = "1";
+        aloneCheck.checked = false;
+        coworkerSelect.style.display = 'block';
         updateFormVisibility();
     });
 
@@ -296,7 +302,7 @@
             });
         }
 
-        document.getElementById('totalTitle').innerText = `יומן דיווחים (סה"כ: ${totalEarnings} ₪)`;
+        document.getElementById('totalFooter').innerText = `סה"כ כללי: ${totalEarnings} ₪`;
 
         const taniaBody = document.getElementById('taniaTableBody');
         taniaBody.innerHTML = '';
