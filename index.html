@@ -5,31 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>מעקב ססיות ושעות נוספות</title>
     <style>
-        body { font-family: system-ui, -apple-system, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 12px; direction: rtl; }
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 10px; direction: rtl; }
         .max-w { max-width: 440px; margin: 0 auto; }
-        .card { background: white; padding: 12px 14px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; margin-bottom: 12px; }
-        h1 { text-align: center; font-size: 1.15rem; margin: 0; color: #0f172a; }
-        label { display: block; font-size: 0.825rem; font-weight: 600; margin-bottom: 3px; color: #334155; }
-        input, select { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; margin-bottom: 10px; font-size: 0.95rem; background-color: #fff; }
-        button { width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem; cursor: pointer; color: white; }
+        .card { background: white; padding: 10px 12px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; margin-bottom: 10px; }
+        h1 { text-align: center; font-size: 1.1rem; margin: 0; color: #0f172a; }
+        label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 2px; color: #334155; }
+        input, select { width: 100%; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; margin-bottom: 8px; font-size: 0.9rem; background-color: #fff; }
+        button { width: 100%; padding: 9px; border: none; border-radius: 6px; font-weight: bold; font-size: 0.9rem; cursor: pointer; color: white; }
         .btn-blue { background-color: #2563eb; }
-        .btn-blue:active { background-color: #1d4ed8; }
-        .btn-green { background-color: #059669; margin-bottom: 12px; }
-        .btn-red { background-color: #ef4444; width: auto; padding: 3px 8px; font-size: 0.75rem; border-radius: 6px; }
-        .entry-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 6px; font-size: 0.85rem; }
-        table { width: 100%; border-collapse: collapse; margin-top: 6px; }
-        th, td { padding: 6px 8px; text-align: right; border-bottom: 1px solid #e2e8f0; font-size: 0.85rem; }
+        .btn-green { background-color: #059669; margin-bottom: 10px; }
+        .btn-red { background-color: #ef4444; width: auto; padding: 2px 6px; font-size: 0.75rem; border-radius: 4px; }
+        .entry-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 5px; font-size: 0.8rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        th, td { padding: 5px 6px; text-align: right; border-bottom: 1px solid #e2e8f0; font-size: 0.8rem; }
         th { background: #f1f5f9; font-weight: bold; }
         .hidden { display: none; }
-        .checkbox-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+        .checkbox-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
         .checkbox-row input { width: auto; margin: 0; }
-        .checkbox-row label { display: inline; margin: 0; font-size: 0.85rem; cursor: pointer; }
+        .checkbox-row label { display: inline; margin: 0; font-size: 0.8rem; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="max-w">
-    <div class="card" style="padding: 10px;">
+    <div class="card" style="padding: 8px;">
         <h1>מעקב ססיות ושעות נוספות</h1>
     </div>
 
@@ -41,4 +40,102 @@
         <label>סוג ססיה</label>
         <select id="sessionTypeSelect" onchange="toggleCoworker()">
             <option value="A_SESSION" data-rate="200" data-unit="שעות" data-req="false">ע ססיה (200 ₪)</option>
-            <option value="
+            <option value="KNEE" data-rate="175" data-unit="מטופלות" data-req="true">ברכי (175 ₪)</option>
+            <option value="MASKS" data-rate="400" data-unit="מטופלים" data-req="true">מסיכות (400 ₪)</option>
+            <option value="FRACTIONS" data-rate="143" data-unit="מטופלים" data-req="true">פרקציות (143 ₪)</option>
+            <option value="RADIO" data-rate="216" data-unit="מטופלים" data-req="true">רדיו כירורגיה (216 ₪)</option>
+            <option value="SIMULATION" data-rate="200" data-unit="סימולציות" data-req="true">סימולציות (200 ₪)</option>
+        </select>
+
+        <label id="countLabel">כמות (מטופלים)</label>
+        <input type="number" id="countInput" value="1" min="1">
+
+        <div id="coworker-section">
+            <label>שותף/ה לעבודה</label>
+            <div class="checkbox-row">
+                <input type="checkbox" id="aloneCheck" onchange="toggleAlone()">
+                <label for="aloneCheck">עבדתי לבד</label>
+            </div>
+            <select id="coworkerSelect">
+                <option>שרון</option><option>רותי</option><option>עמית</option><option>מיטל</option>
+                <option>קירה</option><option>ליאם</option><option>רישק</option><option>דורון</option>
+                <option>אבי</option><option>רותם</option><option>ברטה</option><option>סמדר</option>
+            </select>
+        </div>
+
+        <button class="btn-blue" onclick="addSession()">הוסף ססיה</button>
+    </div>
+
+    <button class="btn-green" onclick="toggleTaniaMode()">📸 תצוגת דוח לטניה (צילום מסך)</button>
+
+    <!-- דוח לטניה -->
+    <div id="tania-container" class="card hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 5px;">
+            <strong>דוח לטניה - סיכום חודשי</strong>
+            <button onclick="toggleTaniaMode()" style="width: auto; padding: 3px 8px; background: #e2e8f0; color: #334155; font-size: 0.75rem;">סגור</button>
+        </div>
+        <table>
+            <thead><tr><th>סוג ססיה</th><th style="text-align: left;">כמות מצטברת</th></tr></thead>
+            <tbody id="taniaTableBody"></tbody>
+        </table>
+    </div>
+
+    <!-- יומן דיווחים בתחתית מתחת להכל -->
+    <div class="card">
+        <h3 id="totalTitle" style="margin: 0 0 6px 0; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; font-size: 0.9rem; color: #0f172a;">יומן דיווחים (סה"כ: 0 ₪)</h3>
+        <div id="entriesList"></div>
+    </div>
+</div>
+
+<script>
+    // הגדרת תאריך היום בצורה מותאמת אישית לטלפון
+    const today = new Date();
+    const localDate = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+    document.getElementById('dateInput').value = localDate;
+
+    let entries = JSON.parse(localStorage.getItem('sessions_data') || '[]');
+
+    function toggleCoworker() {
+        const select = document.getElementById('sessionTypeSelect');
+        const opt = select.options[select.selectedIndex];
+        document.getElementById('countLabel').innerText = `כמות (${opt.dataset.unit})`;
+        document.getElementById('coworker-section').style.display = opt.dataset.req === 'true' ? 'block' : 'none';
+    }
+
+    function toggleAlone() {
+        const isAlone = document.getElementById('aloneCheck').checked;
+        document.getElementById('coworkerSelect').style.display = isAlone ? 'none' : 'block';
+    }
+
+    function addSession() {
+        const date = document.getElementById('dateInput').value;
+        const select = document.getElementById('sessionTypeSelect');
+        const sessionKey = select.value;
+        const sessionName = select.options[select.selectedIndex].text.split(' (')[0];
+        const rate = Number(select.options[select.selectedIndex].dataset.rate);
+        const count = Number(document.getElementById('countInput').value);
+        
+        const req = select.options[select.selectedIndex].dataset.req === 'true';
+        const alone = document.getElementById('aloneCheck').checked;
+        const coworker = req ? (alone ? 'עבדתי לבד' : document.getElementById('coworkerSelect').value) : '';
+
+        // בדיקת כפילויות
+        const isDuplicate = entries.some(e => e.date === date && e.sessionKey === sessionKey);
+        if (isDuplicate) {
+            if (!confirm(`שים לב: כבר קיימת רשומת "${sessionName}" בתאריך הזה (${date}). האם אתה בטוח שאתה מוסיף את אותה ססיה פעמיים?`)) {
+                return;
+            }
+        }
+
+        const newEntry = {
+            id: Date.now(),
+            date,
+            sessionKey,
+            sessionName,
+            count,
+            total: count * rate,
+            coworker
+        };
+
+        entries.unshift(newEntry);
+        save
