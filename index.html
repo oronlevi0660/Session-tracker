@@ -8,7 +8,6 @@
         body { font-family: system-ui, -apple-system, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 10px; direction: rtl; }
         .max-w { max-width: 440px; margin: 0 auto; }
         .card { background: white; padding: 10px 12px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; margin-bottom: 10px; }
-        /* עיצוב כותרת עליונה בצבע תכלת עם אותיות מעט גדולות יותר */
         .header-card { background-color: #e0f2fe; border: 1px solid #bae6fd; padding: 16px 12px; text-align: center; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 10px; }
         h1 { margin: 0; font-size: 1.4rem; color: #0369a1; font-weight: 700; }
         label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 2px; color: #334155; }
@@ -29,6 +28,8 @@
         .checkbox-row label { display: inline; margin: 0; font-size: 0.8rem; cursor: pointer; }
         .backup-row { display: flex; gap: 6px; margin-bottom: 10px; }
         .total-footer { margin-top: 8px; border-top: 2px solid #cbd5e1; padding-top: 8px; text-align: left; font-weight: bold; font-size: 0.95rem; color: #0f172a; }
+        .filter-row { display: flex; gap: 6px; margin-bottom: 8px; align-items: center; }
+        .filter-row select { margin-bottom: 0; font-size: 0.8rem; padding: 5px; }
     </style>
 </head>
 <body>
@@ -92,11 +93,21 @@
             <thead><tr><th>סוג ססיה</th><th style="text-align: left;">כמות מצטברת</th></tr></thead>
             <tbody id="taniaTableBody"></tbody>
         </table>
+        <button type="button" class="btn-blue" id="copyWhatsAppBtn" style="margin-top: 8px; font-size: 0.8rem; padding: 6px; background-color: #10b981;">📋 העתק דוח לוואטסאפ</button>
     </div>
 
-    <!-- יומן דיווחים בתחתית המוחלטת של העמוד עם כותרת ממוכזת -->
+    <!-- יומן דיווחים בתחתית המוחלטת של העמוד עם סינון חודשי -->
     <div class="card">
         <h3 style="margin: 0 0 6px 0; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; font-size: 0.9rem; color: #0f172a; text-align: center;">יומן דיווחים</h3>
+        
+        <!-- סרגל סינון לפי חודש -->
+        <div class="filter-row">
+            <label style="margin:0; font-size:0.75rem; white-space:nowrap;">סינון חודש:</label>
+            <select id="monthFilter" onchange="render()">
+                <option value="ALL">הצג הכל</option>
+            </select>
+        </div>
+
         <div id="entriesList"></div>
         <div id="totalFooter" class="total-footer">סה"כ כללי: 0 ₪</div>
     </div>
@@ -197,7 +208,6 @@
         entries.push(newEntry);
         sortAndSave();
 
-        // איפוס בחירת סוג הססיה חזרה לברירת המחדל "בחר"
         sessionSelect.value = "";
         document.getElementById('countInput').value = "1";
         aloneCheck.checked = false;
@@ -276,16 +286,56 @@
     taniaBtn.addEventListener('click', toggleTania);
     closeTaniaBtn.addEventListener('click', toggleTania);
 
+    // עדכון רשימת החודשים בבורר הסינון
+    function updateMonthFilterOptions() {
+        const monthFilter = document.getElementById('monthFilter');
+        const currentSelected = monthFilter.value;
+        
+        // איסוף כל החודשים הקיימים ברשומות
+        const monthsSet = new Set();
+        entries.forEach(e => {
+            if (e.date && e.date.length >= 7) {
+                monthsSet.add(e.date.substring(0, 7)); // פורמט YYYY-MM
+            }
+        });
+
+        // מיון חודשים מהחדש לישן
+        const sortedMonths = Array.from(monthsSet).sort().reverse();
+
+        monthFilter.innerHTML = '<option value="ALL">הצג הכל</option>';
+        sortedMonths.forEach(m => {
+            const [year, monthNum] = m.split('-');
+            const opt = document.createElement('option');
+            opt.value = m;
+            opt.innerText = `${monthNum}/${year}`;
+            monthFilter.appendChild(opt);
+        });
+
+        // שמירת הבחירה הקודמת אם קיימת
+        if (sortedMonths.includes(currentSelected) || currentSelected === 'ALL') {
+            monthFilter.value = currentSelected;
+        }
+    }
+
     function render() {
+        updateMonthFilterOptions();
+        const selectedMonth = document.getElementById('monthFilter').value;
+
         const list = document.getElementById('entriesList');
         list.innerHTML = '';
         let totalEarnings = 0;
         let summary = {};
 
-        if (entries.length === 0) {
-            list.innerHTML = '<div style="text-align:center; color:#94a3b8; font-size:0.8rem; padding:6px 0;">עדיין לא הוזנו ססיות</div>';
+        // סינון רשומות לפי החודש הנבחר (או הצג הכל)
+        const filteredEntries = entries.filter(e => {
+            if (selectedMonth === 'ALL') return true;
+            return e.date && e.date.startsWith(selectedMonth);
+        });
+
+        if (filteredEntries.length === 0) {
+            list.innerHTML = '<div style="text-align:center; color:#94a3b8; font-size:0.8rem; padding:6px 0;">אין דיווחים להצגה</div>';
         } else {
-            entries.forEach(e => {
+            filteredEntries.forEach(e => {
                 totalEarnings += (e.total || 0);
                 summary[e.sessionName] = (summary[e.sessionName] || 0) + (e.count || 0);
 
@@ -309,12 +359,31 @@
 
         const taniaBody = document.getElementById('taniaTableBody');
         taniaBody.innerHTML = '';
+        
+        // טבלת לטניה תציג את הסיכום של כלל הנתונים או החודש המסונן (כאן נציג לפי החודש המסונן אם נבחר, או הכל)
         for (const [name, count] of Object.entries(summary)) {
             const tr = document.createElement('tr');
             tr.innerHTML = `<td>${name}</td><td style="text-align: left;">${count}</td>`;
             taniaBody.appendChild(tr);
         }
     }
+
+    // כפתור העתקת דוח לוואטסאפ
+    document.getElementById('copyWhatsAppBtn').addEventListener('click', () => {
+        let text = "דוח ססיות סיכום חודשי:\n";
+        let summary = {};
+        entries.forEach(e => {
+            summary[e.sessionName] = (summary[e.sessionName] || 0) + (e.count || 0);
+        });
+        for (const [name, count] of Object.entries(summary)) {
+            text += `- ${name}: ${count}\n`;
+        }
+        navigator.clipboard.writeText(text).then(() => {
+            alert("הדוח הועתק בהצלחה! ניתן להדביק בוואטסאפ.");
+        }).catch(err => {
+            alert("שגיאה בהעתקת הנתונים.");
+        });
+    });
 
     updateFormVisibility();
     sortAndSave();
