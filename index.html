@@ -106,7 +106,6 @@
         SIMULATION: { name: 'סימולציות', rate: 200, unit: 'סימולציות', req: true }
     };
 
-    // טעינה בטוחה עם הגנה מפני קריסה
     let entries = [];
     try {
         const saved = localStorage.getItem('sessions_data');
@@ -180,15 +179,21 @@
         };
 
         entries.push(newEntry);
-        saveAndRender();
+        sortAndSave();
     });
 
     window.deleteEntry = function(id) {
         entries = entries.filter(e => e.id !== id);
-        saveAndRender();
+        sortAndSave();
     };
 
-    function saveAndRender() {
+    function sortAndSave() {
+        // מיון כרונולוגי: מהישן לחדש (כך שהחדשים יופיעו תמיד בתחתית)
+        entries.sort((a, b) => {
+            if (a.date === b.date) return a.id - b.id;
+            return new Date(a.date) - new Date(b.date);
+        });
+
         try {
             localStorage.setItem('sessions_data', JSON.stringify(entries));
         } catch (e) {}
@@ -218,7 +223,7 @@
                     const parsed = JSON.parse(evt.target.result);
                     if (Array.isArray(parsed)) {
                         entries = parsed;
-                        saveAndRender();
+                        sortAndSave();
                         alert("הנתונים שוחזרו בהצלחה!");
                     } else {
                         alert("קובץ הגיבוי אינו תקין.");
@@ -290,7 +295,7 @@
     }
 
     updateFormVisibility();
-    render();
+    sortAndSave();
 </script>
 
 </body>
