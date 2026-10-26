@@ -8,8 +8,28 @@
         body { font-family: system-ui, -apple-system, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 10px; direction: rtl; }
         .max-w { max-width: 440px; margin: 0 auto; }
         .card { background: white; padding: 10px 12px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; margin-bottom: 10px; }
-        .header-card { background-color: #e0f2fe; border: 1px solid #bae6fd; padding: 16px 12px; text-align: center; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 10px; }
+        
+        /* עיצוב כותרת עליונה בצבע תכלת משולבת עם אייקון מאיץ לינארי */
+        .header-card { 
+            background-color: #e0f2fe; 
+            border: 1px solid #bae6fd; 
+            padding: 12px; 
+            border-radius: 10px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08); 
+            margin-bottom: 10px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .header-icon-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0284c7;
+        }
         h1 { margin: 0; font-size: 1.4rem; color: #0369a1; font-weight: 700; }
+        
         label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 2px; color: #334155; }
         input, select { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; margin-bottom: 8px; font-size: 0.9rem; background-color: #fff; }
         button { width: 100%; padding: 10px; border: none; border-radius: 6px; font-weight: bold; font-size: 0.9rem; cursor: pointer; color: white; }
@@ -35,8 +55,27 @@
 <body>
 
 <div class="max-w">
-    <!-- כותרת עליונה מעוצבת בתכלת עם אותיות מוגדלות -->
+    <!-- כותרת עליונה עם איור מאיץ לינארי וסימון קרינה ממוקדת -->
     <div class="header-card">
+        <div class="header-icon-container">
+            <svg width="42" height="42" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- זרוע המאיץ הלינארי (LINAC Gantry) -->
+                <path d="M20 85 H80 V78 H20 V85 Z" fill="#0284c7"/>
+                <path d="M68 22 C68 22 78 22 78 35 V78 H66 V35 C66 28 62 26 55 26 H38 V42 H22 V22 H68 Z" fill="#0284c7"/>
+                <!-- ראש ההקרנה (Radiation Head) -->
+                <rect x="24" y="42" width="12" height="6" rx="1" fill="#0369a1"/>
+                <!-- קרני הקרנה ממוקדות -->
+                <path d="M27 50 L22 62 M30 50 L30 62 M33 50 L38 62" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+                <!-- מיטת הטיפולים (Treatment Couch) -->
+                <rect x="18" y="64" width="38" height="5" rx="2" fill="#0284c7"/>
+                <rect x="32" y="69" width="10" height="9" fill="#0369a1"/>
+                <!-- סמל הקרינה (Radiation Symbol) -->
+                <circle cx="58" cy="18" r="3" fill="#0284c7"/>
+                <path d="M58 11 L56 15 A3 3 0 0 1 60 15 Z" fill="#0284c7"/>
+                <path d="M64 21 L60 19 A3 3 0 0 1 62 23 Z" fill="#0284c7"/>
+                <path d="M52 21 L54 23 A3 3 0 0 1 56 19 Z" fill="#0284c7"/>
+            </svg>
+        </div>
         <h1>מעקב ססיות</h1>
     </div>
 
@@ -96,7 +135,7 @@
         <button type="button" class="btn-blue" id="copyWhatsAppBtn" style="margin-top: 8px; font-size: 0.8rem; padding: 6px; background-color: #10b981;">📋 העתק דוח לוואטסאפ</button>
     </div>
 
-    <!-- יומן דיווחים בתחתית המוחלטת של העמוד עם סינון חודשי -->
+    <!-- יומן דיווחים בתחתית המוחלטת של העמוד -->
     <div class="card">
         <h3 style="margin: 0 0 6px 0; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; font-size: 0.9rem; color: #0f172a; text-align: center;">יומן דיווחים</h3>
         
@@ -286,20 +325,17 @@
     taniaBtn.addEventListener('click', toggleTania);
     closeTaniaBtn.addEventListener('click', toggleTania);
 
-    // עדכון רשימת החודשים בבורר הסינון
     function updateMonthFilterOptions() {
         const monthFilter = document.getElementById('monthFilter');
         const currentSelected = monthFilter.value;
         
-        // איסוף כל החודשים הקיימים ברשומות
         const monthsSet = new Set();
         entries.forEach(e => {
             if (e.date && e.date.length >= 7) {
-                monthsSet.add(e.date.substring(0, 7)); // פורמט YYYY-MM
+                monthsSet.add(e.date.substring(0, 7));
             }
         });
 
-        // מיון חודשים מהחדש לישן
         const sortedMonths = Array.from(monthsSet).sort().reverse();
 
         monthFilter.innerHTML = '<option value="ALL">הצג הכל</option>';
@@ -311,7 +347,6 @@
             monthFilter.appendChild(opt);
         });
 
-        // שמירת הבחירה הקודמת אם קיימת
         if (sortedMonths.includes(currentSelected) || currentSelected === 'ALL') {
             monthFilter.value = currentSelected;
         }
@@ -326,7 +361,6 @@
         let totalEarnings = 0;
         let summary = {};
 
-        // סינון רשומות לפי החודש הנבחר (או הצג הכל)
         const filteredEntries = entries.filter(e => {
             if (selectedMonth === 'ALL') return true;
             return e.date && e.date.startsWith(selectedMonth);
@@ -360,7 +394,6 @@
         const taniaBody = document.getElementById('taniaTableBody');
         taniaBody.innerHTML = '';
         
-        // טבלת לטניה תציג את הסיכום של כלל הנתונים או החודש המסונן (כאן נציג לפי החודש המסונן אם נבחר, או הכל)
         for (const [name, count] of Object.entries(summary)) {
             const tr = document.createElement('tr');
             tr.innerHTML = `<td>${name}</td><td style="text-align: left;">${count}</td>`;
@@ -368,7 +401,6 @@
         }
     }
 
-    // כפתור העתקת דוח לוואטסאפ
     document.getElementById('copyWhatsAppBtn').addEventListener('click', () => {
         let text = "דוח ססיות סיכום חודשי:\n";
         let summary = {};
