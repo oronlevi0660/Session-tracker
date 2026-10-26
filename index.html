@@ -89,7 +89,7 @@
         </table>
     </div>
 
-    <!-- יומן דיווחים בתחתית -->
+    <!-- יומן דיווחים מועבר לסוף העמוד מתחת לכל הרשימה -->
     <div class="card">
         <h3 id="totalTitle" style="margin: 0 0 6px 0; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; font-size: 0.9rem; color: #0f172a;">יומן דיווחים (סה"כ: 0 ₪)</h3>
         <div id="entriesList"></div>
@@ -188,7 +188,6 @@
     };
 
     function sortAndSave() {
-        // מיון כרונולוגי: מהישן לחדש (כך שהחדשים יופיעו תמיד בתחתית)
         entries.sort((a, b) => {
             if (a.date === b.date) return a.id - b.id;
             return new Date(a.date) - new Date(b.date);
