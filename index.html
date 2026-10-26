@@ -4,90 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>מעקב ססיות ושעות נוספות</title>
-    <!-- טעינת React 18 בצורה יציבה -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- טעינת Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- טעינת Babel לקומפילציה חלקה -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 16px; direction: rtl; }
+        .max-w { max-width: 440px; margin: 0 auto; }
+        .card { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; margin-bottom: 16px; }
+        h1 { text-align: center; font-size: 1.25rem; margin: 0 0 16px 0; }
+        label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 4px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; margin-bottom: 12px; font-size: 1rem; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; color: white; }
+        .btn-blue { background-color: #2563eb; }
+        .btn-green { background-color: #059669; margin-bottom: 16px; }
+        .btn-red { background-color: #dc2626; width: auto; padding: 4px 8px; font-size: 0.75rem; }
+        .entry-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; font-size: 0.875rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        th, td { padding: 8px; text-align: right; border-bottom: 1px solid #e2e8f0; font-size: 0.875rem; }
+        th { background: #f1f5f9; }
+        .hidden { display: none; }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
-    <div id="root"></div>
+<body>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+<div class="max-w">
+    <div class="card">
+        <h1>מעקב ססיות ושעות נוספות</h1>
+    </div>
 
-        const SESSION_TYPES = {
-            A_SESSION: { name: 'ע ססיה', rate: 200, unit: 'שעות', isHourly: true, requireCoworker: false },
-            KNEE: { name: 'ברכי', rate: 175, unit: 'מטופלות', isHourly: false, requireCoworker: true },
-            MASKS: { name: 'מסיכות', rate: 400, unit: 'מטופלים', isHourly: false, requireCoworker: true },
-            FRACTIONS: { name: 'פרקציות', rate: 143, unit: 'מטופלים', isHourly: false, requireCoworker: true },
-            RADIO: { name: 'רדיו כירורגיה', rate: 216, unit: 'מטופלים', isHourly: false, requireCoworker: true },
-            SIMULATION: { name: 'סימולציות', rate: 200, unit: 'סימולציות', isHourly: false, requireCoworker: true }
-        };
+    <!-- טופס הזנה -->
+    <div id="form-container" class="card">
+        <label>תאריך</label>
+        <input type="date" id="dateInput">
 
-        const COWORKERS = ['שרון', 'רותי', 'עמית', 'מיטל', 'קירה', 'ליאם', 'רישק', 'דורון', 'אבי', 'רותם', 'ברטה', 'סמדר'];
+        <label>סוג ססיה</label>
+        <select id="sessionTypeSelect" onchange="toggleCoworker()">
+            <option value="A_SESSION" data-rate="200" data-unit="שעות" data-req="false">ע ססיה (200 ₪)</option>
+            <option value="KNEE" data-rate="175" data-unit="מטופלות" data-req="true">ברכי (175 ₪)</option>
+            <option value="MASKS" data-rate="400" data-unit="מטופלים" data-req="true">מסיכות (400 ₪)</option>
+            <option value="FRACTIONS" data-rate="143" data-unit="מטופלים" data-req="true">פרקציות (143 ₪)</option>
+            <option value="RADIO" data-rate="216" data-unit="מטופלים" data-req="true">רדיו כירורגיה (216 ₪)</option>
+            <option value="SIMULATION" data-rate="200" data-unit="סימולציות" data-req="true">סימולציות (200 ₪)</option>
+        </select>
 
-        function App() {
-            const [entries, setEntries] = useState(() => {
-                const saved = localStorage.getItem('sessions_data');
-                return saved ? JSON.parse(saved) : [];
-            });
-            const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-            const [sessionKey, setSessionKey] = useState('MASKS');
-            const [count, setCount] = useState(1);
-            const [coworker, setCoworker] = useState(COWORKERS[0]);
-            const [alone, setAlone] = useState(false);
-            const [isTaniaMode, setIsTaniaMode] = useState(false);
+        <label id="countLabel">כמות (מטופלים)</label>
+        <input type="number" id="countInput" value="1" min="1">
 
-            useEffect(() => {
-                localStorage.setItem('sessions_data', JSON.stringify(entries));
-            }, [entries]);
-
-            const currentSession = SESSION_TYPES[sessionKey];
-
-            const handleAdd = () => {
-                const targetCoworker = currentSession.requireCoworker ? (alone ? 'עבדתי לבד' : coworker) : '';
-                
-                const isDuplicate = entries.some(e => e.date === date && e.sessionKey === sessionKey);
-
-                if (isDuplicate) {
-                    const confirmAdd = window.confirm(`שים לב: כבר קיימת רשומת "${currentSession.name}" בתאריך הזה (${date}). האם אתה בטוח שאתה מוסיף את אותה ססיה פעמיים?`);
-                    if (!confirmAdd) return;
-                }
-
-                const newEntry = {
-                    id: Date.now(),
-                    date,
-                    sessionKey,
-                    sessionName: currentSession.name,
-                    count: Number(count),
-                    rate: currentSession.rate,
-                    total: Number(count) * currentSession.rate,
-                    coworker: targetCoworker
-                };
-                setEntries([newEntry, ...entries]);
-            };
-
-            const handleDelete = (id) => {
-                setEntries(entries.filter(e => e.id !== id));
-            };
-
-            const taniaSummary = entries.reduce((acc, entry) => {
-                acc[entry.sessionName] = (acc[entry.sessionName] || 0) + entry.count;
-                return acc;
-            }, {});
-
-            const totalEarnings = entries.reduce((sum, entry) => sum + entry.total, 0);
-
-            return (
-                <div className="max-w-md mx-auto p-4 space-y-6 pb-20">
-                    <header className="bg-white p-4 rounded-xl shadow-sm border text-center">
-                        <h1 className="text-xl font-bold text-slate-800">מעקב ססיות ושעות נוספות</h1>
-                    </header>
-
-                    {/* דוח לטניה */}
-                    {isTaniaMode ? (
-                        <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200 space-y-4">
-                            <div
+        <div id="coworker-section">
+            <label>שותף/ה לעבודה</label>
+            <div style="margin-bottom: 8px;">
+                <input type="checkbox" id="aloneCheck" onchange="toggleAlone()" style="width: auto; margin-left: 8px;">
+                <label for="aloneCheck" style="display:inline;">
