@@ -9,7 +9,6 @@
         .max-w { max-width: 440px; margin: 0 auto; }
         .card { background: white; padding: 10px 12px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; margin-bottom: 10px; }
         
-        /* עיצוב כותרת עליונה עם מאיץ לינארי מימין וסמל קרינה מדויק מושלם משמאל */
         .header-card { 
             background-color: #e0f2fe; 
             border: 1px solid #bae6fd; 
@@ -45,4 +44,383 @@
         .checkbox-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
         .checkbox-row input { width: auto; margin: 0; }
         .checkbox-row label { display: inline; margin: 0; font-size: 0.8rem; cursor: pointer; }
-        .backup-row { display: flex; gap: 6px; margin-bottom: 10px
+        .backup-row { display: flex; gap: 6px; margin-bottom: 10px; }
+        .total-footer { margin-top: 8px; border-top: 2px solid #cbd5e1; padding-top: 8px; text-align: left; font-weight: bold; font-size: 0.95rem; color: #0f172a; }
+        .filter-row { display: flex; gap: 6px; margin-bottom: 8px; align-items: center; }
+        .filter-row select { margin-bottom: 0; font-size: 0.8rem; padding: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="max-w">
+    <div class="header-card">
+        <!-- אייקון מאיץ לינארי שחור מימין -->
+        <div class="header-side">
+            <svg width="45" height="45" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 85 H85 V78 H15 V85 Z" fill="#000000"/>
+                <path d="M68 20 C68 20 80 20 80 35 V78 H65 V35 C65 27 60 25 52 25 H38 V42 H20 V20 H68 Z" fill="#000000"/>
+                <rect x="23" y="42" width="14" height="7" rx="1" fill="#000000"/>
+                <path d="M26 51 L20 63 M30 51 L30 63 M34 51 L40 63" stroke="#000000" stroke-width="2.5" stroke-linecap="round"/>
+                <rect x="15" y="65" width="42" height="6" rx="2" fill="#000000"/>
+                <rect x="31" y="71" width="10" height="7" fill="#000000"/>
+            </svg>
+        </div>
+        
+        <h1>מעקב ססיות</h1>
+
+        <!-- סמל קרינה צהוב-שחור מדויק משמאל -->
+        <div class="header-side">
+            <svg width="45" height="45" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="46" fill="#ffe600" stroke="#000000" stroke-width="5"/>
+                <circle cx="50" cy="50" r="11" fill="#000000"/>
+                <path d="M50 50 L31 13 A44 44 0 0 1 69 13 Z" fill="#000000"/>
+                <path d="M50 50 L84 70 A44 44 0 0 1 50 94 Z" fill="#000000"/>
+                <path d="M50 50 L16 70 A44 44 0 0 1 50 94 Z" fill="#000000"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- טופס הזנה -->
+    <div id="form-container" class="card">
+        <label>תאריך</label>
+        <input type="date" id="dateInput">
+
+        <label>סוג ססיה</label>
+        <select id="sessionTypeSelect">
+            <option value="" disabled selected>-- בחר סוג ססיה --</option>
+            <option value="A_SESSION">ע ססיה (200 ₪)</option>
+            <option value="KNEE">ברכי (175 ₪)</option>
+            <option value="MASKS">מסיכות (400 ₪)</option>
+            <option value="FRACTIONS">פרקציות (143 ₪)</option>
+            <option value="RADIO">רדיו כירורגיה (216 ₪)</option>
+            <option value="SIMULATION">סימולציות (200 ₪)</option>
+        </select>
+
+        <label id="countLabel">כמות (שעות)</label>
+        <input type="number" id="countInput" value="1" min="1">
+
+        <div id="coworker-section" class="hidden">
+            <label>שותף/ה לעבודה</label>
+            <div class="checkbox-row">
+                <input type="checkbox" id="aloneCheck">
+                <label for="aloneCheck">עבדתי לבד</label>
+            </div>
+            <select id="coworkerSelect">
+                <option>שרון</option><option>רותי</option><option>עמית</option><option>מיטל</option>
+                <option>קירה</option><option>ליאם</option><option>רישק</option><option>דורון</option><option>אבי</option><option>רותם</option><option>ברטה</option><option>סמדר</option>
+            </select>
+        </div>
+
+        <button type="button" class="btn-blue" id="addBtn">הוסף ססיה</button>
+    </div>
+
+    <button type="button" class="btn-green" id="taniaBtn">שליחת דוח</button>
+
+    <!-- כפתורי גיבוי ושחזור -->
+    <div class="backup-row">
+        <button type="button" class="btn-purple" id="exportBtn">📥 גיבוי נתונים</button>
+        <button type="button" class="btn-purple" id="importBtn">📤 שחזור מגיבוי</button>
+        <input type="file" id="importFile" style="display:none" accept=".json">
+    </div>
+
+    <!-- דוח לטניה -->
+    <div id="tania-container" class="card hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 5px;">
+            <strong>דוח לטניה - סיכום חודשי</strong>
+            <button type="button" id="closeTaniaBtn" style="width: auto; padding: 3px 8px; background: #e2e8f0; color: #334155; font-size: 0.75rem;">סגור</button>
+        </div>
+        <table>
+            <thead><tr><th>סוג ססיה</th><th style="text-align: left;">כמות מצטברת</th></tr></thead>
+            <tbody id="taniaTableBody"></tbody>
+        </table>
+        <button type="button" class="btn-blue" id="copyWhatsAppBtn" style="margin-top: 8px; font-size: 0.8rem; padding: 6px; background-color: #10b981;">📋 העתק דוח לוואטסאפ</button>
+    </div>
+
+    <!-- יומן דיווחים בתחתית המוחלטת של העמוד -->
+    <div class="card">
+        <h3 style="margin: 0 0 6px 0; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; font-size: 0.9rem; color: #0f172a; text-align: center;">יומן דיווחים</h3>
+        
+        <!-- סרגל סינון לפי חודש -->
+        <div class="filter-row">
+            <label style="margin:0; font-size:0.75rem; white-space:nowrap;">סינון חודש:</label>
+            <select id="monthFilter" onchange="render()">
+                <option value="ALL">הצג הכל</option>
+            </select>
+        </div>
+
+        <div id="entriesList"></div>
+        <div id="totalFooter" class="total-footer">סה"כ כללי: 0 ₪</div>
+    </div>
+</div>
+
+<script>
+    const CONFIG = {
+        A_SESSION: { name: 'ע ססיה', rate: 200, unit: 'שעות', req: false },
+        KNEE: { name: 'ברכי', rate: 175, unit: 'מטופלות', req: true },
+        MASKS: { name: 'מסיכות', rate: 400, unit: 'מטופלים', req: true },
+        FRACTIONS: { name: 'פרקציות', rate: 143, unit: 'מטופלים', req: true },
+        RADIO: { name: 'רדיו כירורגיה', rate: 216, unit: 'מטופלים', req: true },
+        SIMULATION: { name: 'סימולציות', rate: 200, unit: 'סימולציות', req: true }
+    };
+
+    let entries = [];
+    try {
+        const saved = localStorage.getItem('sessions_data');
+        if (saved) {
+            entries = JSON.parse(saved);
+            if (!Array.isArray(entries)) entries = [];
+        }
+    } catch (e) {
+        entries = [];
+    }
+
+    const dateInput = document.getElementById('dateInput');
+    const d = new Date();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    dateInput.value = `${d.getFullYear()}-${month}-${day}`;
+
+    const sessionSelect = document.getElementById('sessionTypeSelect');
+    const countLabel = document.getElementById('countLabel');
+    const coworkerSection = document.getElementById('coworker-section');
+    const aloneCheck = document.getElementById('aloneCheck');
+    const coworkerSelect = document.getElementById('coworkerSelect');
+
+    function updateFormVisibility() {
+        const key = sessionSelect.value;
+        if (!key || !CONFIG[key]) {
+            coworkerSection.classList.add('hidden');
+            countLabel.innerText = 'כמות';
+            return;
+        }
+        const item = CONFIG[key];
+        countLabel.innerText = `כמות (${item.unit})`;
+        if (item.req) {
+            coworkerSection.classList.remove('hidden');
+        } else {
+            coworkerSection.classList.add('hidden');
+        }
+    }
+
+    sessionSelect.addEventListener('change', updateFormVisibility);
+    aloneCheck.addEventListener('change', () => {
+        coworkerSelect.style.display = aloneCheck.checked ? 'none' : 'block';
+    });
+
+    document.getElementById('addBtn').addEventListener('click', () => {
+        const date = dateInput.value;
+        if (!date) {
+            alert('אנא בחר תאריך');
+            return;
+        }
+
+        const key = sessionSelect.value;
+        if (!key || !CONFIG[key]) {
+            alert('אנא בחר סוג ססיה');
+            return;
+        }
+
+        const item = CONFIG[key];
+        const count = Number(document.getElementById('countInput').value) || 1;
+
+        let coworker = '';
+        if (item.req) {
+            coworker = aloneCheck.checked ? 'עבדתי לבד' : coworkerSelect.value;
+        }
+
+        const isDuplicate = entries.some(e => e.date === date && e.sessionKey === key);
+        if (isDuplicate) {
+            if (!confirm(`שים לב: כבר קיימת רשומת "${item.name}" בתאריך הזה (${date}). להוסיף אותה פעם נוספת?`)) {
+                return;
+            }
+        }
+
+        const newEntry = {
+            id: Date.now(),
+            date,
+            sessionKey: key,
+            sessionName: item.name,
+            count,
+            total: count * item.rate,
+            coworker
+        };
+
+        entries.push(newEntry);
+        sortAndSave();
+
+        sessionSelect.value = "";
+        document.getElementById('countInput').value = "1";
+        aloneCheck.checked = false;
+        coworkerSelect.style.display = 'block';
+        updateFormVisibility();
+    });
+
+    window.deleteEntry = function(id) {
+        entries = entries.filter(e => e.id !== id);
+        sortAndSave();
+    };
+
+    function sortAndSave() {
+        entries.sort((a, b) => {
+            if (a.date === b.date) return a.id - b.id;
+            return new Date(a.date) - new Date(b.date);
+        });
+
+        try {
+            localStorage.setItem('sessions_data', JSON.stringify(entries));
+        } catch (e) {}
+        render();
+    }
+
+    document.getElementById('exportBtn').addEventListener('click', () => {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(entries));
+        const a = document.createElement('a');
+        a.href = dataStr;
+        a.download = "sessions_backup.json";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    });
+
+    document.getElementById('importBtn').addEventListener('click', () => {
+        document.getElementById('importFile').click();
+    });
+
+    document.getElementById('importFile').addEventListener('change', (e) => {
+        if (e.target.files[0]) {
+            const reader = new FileReader();
+            reader.readAsText(e.target.files[0], "UTF-8");
+            reader.onload = (evt) => {
+                try {
+                    const parsed = JSON.parse(evt.target.result);
+                    if (Array.isArray(parsed)) {
+                        entries = parsed;
+                        sortAndSave();
+                        alert("הנתונים שוחזרו בהצלחה!");
+                    } else {
+                        alert("קובץ הגיבוי אינו תקין.");
+                    }
+                } catch (err) {
+                    alert("שגיאה בקובץ הגיבוי");
+                }
+            };
+        }
+    });
+
+    let taniaMode = false;
+    const taniaBtn = document.getElementById('taniaBtn');
+    const closeTaniaBtn = document.getElementById('closeTaniaBtn');
+    const formContainer = document.getElementById('form-container');
+    const taniaContainer = document.getElementById('tania-container');
+
+    function toggleTania() {
+        taniaMode = !taniaMode;
+        if (taniaMode) {
+            formContainer.classList.add('hidden');
+            taniaContainer.classList.remove('hidden');
+        } else {
+            formContainer.classList.remove('hidden');
+            taniaContainer.classList.add('hidden');
+        }
+    }
+    taniaBtn.addEventListener('click', toggleTania);
+    closeTaniaBtn.addEventListener('click', toggleTania);
+
+    function updateMonthFilterOptions() {
+        const monthFilter = document.getElementById('monthFilter');
+        const currentSelected = monthFilter.value;
+        
+        const monthsSet = new Set();
+        entries.forEach(e => {
+            if (e.date && e.date.length >= 7) {
+                monthsSet.add(e.date.substring(0, 7));
+            }
+        });
+
+        const sortedMonths = Array.from(monthsSet).sort().reverse();
+
+        monthFilter.innerHTML = '<option value="ALL">הצג הכל</option>';
+        sortedMonths.forEach(m => {
+            const [year, monthNum] = m.split('-');
+            const opt = document.createElement('option');
+            opt.value = m;
+            opt.innerText = `${monthNum}/${year}`;
+            monthFilter.appendChild(opt);
+        });
+
+        if (sortedMonths.includes(currentSelected) || currentSelected === 'ALL') {
+            monthFilter.value = currentSelected;
+        }
+    }
+
+    function render() {
+        updateMonthFilterOptions();
+        const selectedMonth = document.getElementById('monthFilter').value;
+
+        const list = document.getElementById('entriesList');
+        list.innerHTML = '';
+        let totalEarnings = 0;
+        let summary = {};
+
+        const filteredEntries = entries.filter(e => {
+            if (selectedMonth === 'ALL') return true;
+            return e.date && e.date.startsWith(selectedMonth);
+        });
+
+        if (filteredEntries.length === 0) {
+            list.innerHTML = '<div style="text-align:center; color:#94a3b8; font-size:0.8rem; padding:6px 0;">אין דיווחים להצגה</div>';
+        } else {
+            filteredEntries.forEach(e => {
+                totalEarnings += (e.total || 0);
+                summary[e.sessionName] = (summary[e.sessionName] || 0) + (e.count || 0);
+
+                const div = document.createElement('div');
+                div.className = 'entry-item';
+                div.innerHTML = `
+                    <div>
+                        <strong>${e.sessionName} - ${e.count}</strong><br>
+                        <span style="color: #64748b; font-size: 0.7rem;">${e.date} ${e.coworker ? '| עם: ' + e.coworker : ''}</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <strong>${e.total} ₪</strong>
+                        <button type="button" class="btn-red" onclick="deleteEntry(${e.id})">מחק</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        document.getElementById('totalFooter').innerText = `סה"כ כללי: ${totalEarnings} ₪`;
+
+        const taniaBody = document.getElementById('taniaTableBody');
+        taniaBody.innerHTML = '';
+        
+        for (const [name, count] of Object.entries(summary)) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${name}</td><td style="text-align: left;">${count}</td>`;
+            taniaBody.appendChild(tr);
+        }
+    }
+
+    document.getElementById('copyWhatsAppBtn').addEventListener('click', () => {
+        let text = "דוח ססיות סיכום חודשי:\n";
+        let summary = {};
+        entries.forEach(e => {
+            summary[e.sessionName] = (summary[e.sessionName] || 0) + (e.count || 0);
+        });
+        for (const [name, count] of Object.entries(summary)) {
+            text += `- ${name}: ${count}\n`;
+        }
+        navigator.clipboard.writeText(text).then(() => {
+            alert("הדוח הועתק בהצלחה! ניתן להדביק בוואטסאפ.");
+        }).catch(err => {
+            alert("שגיאה בהעתקת הנתונים.");
+        });
+    });
+
+    updateFormVisibility();
+    sortAndSave();
+</script>
+
+</body>
+</html>
