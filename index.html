@@ -60,8 +60,7 @@
             </div>
             <select id="coworkerSelect">
                 <option>שרון</option><option>רותי</option><option>עמית</option><option>מיטל</option>
-                <option>קירה</option><option>ליאם</option><option>רישק</option><option>דורון</option>
-                <option>אבי</option><option>רותם</option><option>ברטה</option><option>סמדר</option>
+                <option>קירה</option><option>ליאם</option><option>רישק</option><option>דורון</option><option>אבי</option><option>רותם</option><option>ברטה</option><option>סמדר</option>
             </select>
         </div>
 
@@ -70,7 +69,7 @@
 
     <button class="btn-green" onclick="toggleTaniaMode()">📸 תצוגת דוח לטניה (צילום מסך)</button>
 
-    <!-- כפתורי גיבוי ושחזור לשקט נפשי -->
+    <!-- כפתורי גיבוי ושחזור -->
     <div class="backup-row">
         <button class="btn-purple" onclick="exportBackup()">📥 גיבוי נתונים</button>
         <button class="btn-purple" onclick="document.getElementById('importFile').click()">📤 שחזור מגיבוי</button>
@@ -89,7 +88,7 @@
         </table>
     </div>
 
-    <!-- יומן דיווחים בתחתית מתחת להכל -->
+    <!-- יומן דיווחים בתחתית -->
     <div class="card">
         <h3 id="totalTitle" style="margin: 0 0 6px 0; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; font-size: 0.9rem; color: #0f172a;">יומן דיווחים (סה"כ: 0 ₪)</h3>
         <div id="entriesList"></div>
@@ -97,5 +96,108 @@
 </div>
 
 <script>
-    const today = new Date();
-    const localDate = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString
+    // תיקון הצגת תאריך בפורמט מקומי תקין YYYY-MM-DD
+    const tzOffset = (new Date()).getTimezoneOffset() * 60000;
+    const localISOTime = (new Date(Date.now() - tzOffset)).toISOString().split('T')[0];
+    document.getElementById('dateInput').value = localISOTime;
+
+    let entries = JSON.parse(localStorage.getItem('sessions_data') || '[]');
+
+    function toggleCoworker() {
+        const select = document.getElementById('sessionTypeSelect');
+        const opt = select.options[select.selectedIndex];
+        document.getElementById('countLabel').innerText = `כמות (${opt.dataset.unit})`;
+        document.getElementById('coworker-section').style.display = opt.dataset.req === 'true' ? 'block' : 'none';
+    }
+
+    function toggleAlone() {
+        const isAlone = document.getElementById('aloneCheck').checked;
+        document.getElementById('coworkerSelect').style.display = isAlone ? 'none' : 'block';
+    }
+
+    function addSession() {
+        const date = document.getElementById('dateInput').value;
+        if (!date) {
+            alert('אנא בחר תאריך תקין');
+            return;
+        }
+
+        const select = document.getElementById('sessionTypeSelect');
+        const sessionKey = select.value;
+        const sessionName = select.options[select.selectedIndex].text.split(' (')[0];
+        const rate = Number(select.options[select.selectedIndex].dataset.rate);
+        const count = Number(document.getElementById('countInput').value);
+        
+        const req = select.options[select.selectedIndex].dataset.req === 'true';
+        const alone = document.getElementById('aloneCheck').checked;
+        const coworker = req ? (alone ? 'עבדתי לבד' : document.getElementById('coworkerSelect').value) : '';
+
+        const isDuplicate = entries.some(e => e.date === date && e.sessionKey === sessionKey);
+        if (isDuplicate) {
+            if (!confirm(`שים לב: כבר קיימת רשומת "${sessionName}" בתאריך הזה (${date}). האם אתה בטוח שאתה מוסיף את אותה ססיה פעמיים?`)) {
+                return;
+            }
+        }
+
+        const newEntry = {
+            id: Date.now(),
+            date,
+            sessionKey,
+            sessionName,
+            count,
+            total: count * rate,
+            coworker
+        };
+
+        entries.unshift(newEntry);
+        saveAndRender();
+    }
+
+    function deleteEntry(id) {
+        entries = entries.filter(e => e.id !== id);
+        saveAndRender();
+    }
+
+    function saveAndRender() {
+        localStorage.setItem('sessions_data', JSON.stringify(entries));
+        render();
+    }
+
+    function exportBackup() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(entries));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "sessions_backup.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    }
+
+    function importBackup(event) {
+        const fileReader = new FileReader();
+        if (event.target.files[0]) {
+            fileReader.readAsText(event.target.files[0], "UTF-8");
+            fileReader.onload = (e) => {
+                try {
+                    entries = JSON.parse(e.target.result);
+                    saveAndRender();
+                    alert("הנתונים שוחזרו בהצלחה!");
+                } catch (error) {
+                    alert("שגיאה בקובץ הגיבוי.");
+                }
+            };
+        }
+    }
+
+    let taniaMode = false;
+    function toggleTaniaMode() {
+        taniaMode = !taniaMode;
+        document.getElementById('form-container').classList.toggle('hidden', taniaMode);
+        document.getElementById('tania-container').classList.toggle('hidden', !taniaMode);
+        render();
+    }
+
+    function render() {
+        const list = document.getElementById('entriesList');
+        list.innerHTML = '';
+        let totalEarnings = 0;
