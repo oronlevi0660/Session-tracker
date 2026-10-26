@@ -4,10 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>מעקב ססיות ושעות נוספות</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <!-- טעינת React 18 בצורה יציבה -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- טעינת Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <!-- טעינת Babel לקומפילציה חלקה -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800">
     <div id="root"></div>
@@ -54,4 +57,37 @@
                     if (!confirmAdd) return;
                 }
 
-                const new
+                const newEntry = {
+                    id: Date.now(),
+                    date,
+                    sessionKey,
+                    sessionName: currentSession.name,
+                    count: Number(count),
+                    rate: currentSession.rate,
+                    total: Number(count) * currentSession.rate,
+                    coworker: targetCoworker
+                };
+                setEntries([newEntry, ...entries]);
+            };
+
+            const handleDelete = (id) => {
+                setEntries(entries.filter(e => e.id !== id));
+            };
+
+            const taniaSummary = entries.reduce((acc, entry) => {
+                acc[entry.sessionName] = (acc[entry.sessionName] || 0) + entry.count;
+                return acc;
+            }, {});
+
+            const totalEarnings = entries.reduce((sum, entry) => sum + entry.total, 0);
+
+            return (
+                <div className="max-w-md mx-auto p-4 space-y-6 pb-20">
+                    <header className="bg-white p-4 rounded-xl shadow-sm border text-center">
+                        <h1 className="text-xl font-bold text-slate-800">מעקב ססיות ושעות נוספות</h1>
+                    </header>
+
+                    {/* דוח לטניה */}
+                    {isTaniaMode ? (
+                        <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200 space-y-4">
+                            <div
