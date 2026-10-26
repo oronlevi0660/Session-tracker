@@ -42,6 +42,7 @@
 
         <label>סוג ססיה</label>
         <select id="sessionTypeSelect">
+            <option value="" disabled selected>-- בחר סוג ססיה --</option>
             <option value="A_SESSION">ע ססיה (200 ₪)</option>
             <option value="KNEE">ברכי (175 ₪)</option>
             <option value="MASKS">מסיכות (400 ₪)</option>
@@ -89,7 +90,7 @@
         </table>
     </div>
 
-    <!-- יומן דיווחים מועבר לסוף העמוד מתחת לכל הרשימה -->
+    <!-- רשימת הפריטים ויומן הדיווחים ממוקמים כעת בוודאות בסוף העמוד מתחת לכל הרכיבים -->
     <div class="card">
         <h3 id="totalTitle" style="margin: 0 0 6px 0; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; font-size: 0.9rem; color: #0f172a;">יומן דיווחים (סה"כ: 0 ₪)</h3>
         <div id="entriesList"></div>
@@ -131,6 +132,10 @@
 
     function updateFormVisibility() {
         const key = sessionSelect.value;
+        if (!key || !CONFIG[key]) {
+            coworkerSection.classList.add('hidden');
+            return;
+        }
         const item = CONFIG[key];
         countLabel.innerText = `כמות (${item.unit})`;
         if (item.req) {
@@ -153,6 +158,11 @@
         }
 
         const key = sessionSelect.value;
+        if (!key || !CONFIG[key]) {
+            alert('אנא בחר סוג ססיה');
+            return;
+        }
+
         const item = CONFIG[key];
         const count = Number(document.getElementById('countInput').value) || 1;
 
@@ -180,6 +190,10 @@
 
         entries.push(newEntry);
         sortAndSave();
+
+        // איפוס בחירת סוג הססיה חזרה למצב "בחר"
+        sessionSelect.value = "";
+        updateFormVisibility();
     });
 
     window.deleteEntry = function(id) {
