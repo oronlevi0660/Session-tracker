@@ -13,7 +13,8 @@
         input, select { width: 100%; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; margin-bottom: 8px; font-size: 0.9rem; background-color: #fff; }
         button { width: 100%; padding: 9px; border: none; border-radius: 6px; font-weight: bold; font-size: 0.9rem; cursor: pointer; color: white; }
         .btn-blue { background-color: #2563eb; }
-        .btn-green { background-color: #059669; margin-bottom: 10px; }
+        .btn-green { background-color: #059669; margin-bottom: 8px; }
+        .btn-purple { background-color: #7c3aed; margin-bottom: 8px; font-size: 0.8rem; padding: 6px; }
         .btn-red { background-color: #ef4444; width: auto; padding: 2px 6px; font-size: 0.75rem; border-radius: 4px; }
         .entry-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 5px; font-size: 0.8rem; }
         table { width: 100%; border-collapse: collapse; margin-top: 5px; }
@@ -23,6 +24,7 @@
         .checkbox-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
         .checkbox-row input { width: auto; margin: 0; }
         .checkbox-row label { display: inline; margin: 0; font-size: 0.8rem; cursor: pointer; }
+        .backup-row { display: flex; gap: 6px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -68,6 +70,13 @@
 
     <button class="btn-green" onclick="toggleTaniaMode()">📸 תצוגת דוח לטניה (צילום מסך)</button>
 
+    <!-- כפתורי גיבוי ושחזור לשקט נפשי -->
+    <div class="backup-row">
+        <button class="btn-purple" onclick="exportBackup()">📥 גיבוי נתונים</button>
+        <button class="btn-purple" onclick="document.getElementById('importFile').click()">📤 שחזור מגיבוי</button>
+        <input type="file" id="importFile" style="display:none" accept=".json" onchange="importBackup(event)">
+    </div>
+
     <!-- דוח לטניה -->
     <div id="tania-container" class="card hidden">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 5px;">
@@ -88,54 +97,5 @@
 </div>
 
 <script>
-    // הגדרת תאריך היום בצורה מותאמת אישית לטלפון
     const today = new Date();
-    const localDate = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
-    document.getElementById('dateInput').value = localDate;
-
-    let entries = JSON.parse(localStorage.getItem('sessions_data') || '[]');
-
-    function toggleCoworker() {
-        const select = document.getElementById('sessionTypeSelect');
-        const opt = select.options[select.selectedIndex];
-        document.getElementById('countLabel').innerText = `כמות (${opt.dataset.unit})`;
-        document.getElementById('coworker-section').style.display = opt.dataset.req === 'true' ? 'block' : 'none';
-    }
-
-    function toggleAlone() {
-        const isAlone = document.getElementById('aloneCheck').checked;
-        document.getElementById('coworkerSelect').style.display = isAlone ? 'none' : 'block';
-    }
-
-    function addSession() {
-        const date = document.getElementById('dateInput').value;
-        const select = document.getElementById('sessionTypeSelect');
-        const sessionKey = select.value;
-        const sessionName = select.options[select.selectedIndex].text.split(' (')[0];
-        const rate = Number(select.options[select.selectedIndex].dataset.rate);
-        const count = Number(document.getElementById('countInput').value);
-        
-        const req = select.options[select.selectedIndex].dataset.req === 'true';
-        const alone = document.getElementById('aloneCheck').checked;
-        const coworker = req ? (alone ? 'עבדתי לבד' : document.getElementById('coworkerSelect').value) : '';
-
-        // בדיקת כפילויות
-        const isDuplicate = entries.some(e => e.date === date && e.sessionKey === sessionKey);
-        if (isDuplicate) {
-            if (!confirm(`שים לב: כבר קיימת רשומת "${sessionName}" בתאריך הזה (${date}). האם אתה בטוח שאתה מוסיף את אותה ססיה פעמיים?`)) {
-                return;
-            }
-        }
-
-        const newEntry = {
-            id: Date.now(),
-            date,
-            sessionKey,
-            sessionName,
-            count,
-            total: count * rate,
-            coworker
-        };
-
-        entries.unshift(newEntry);
-        save
+    const localDate = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString
