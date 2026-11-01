@@ -5,17 +5,249 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>מעקב ססיות ושעות נוספות</title>
   
+  <!-- עיצוב ואלמנטים -->
   <style>
     body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background-color: #f8f9fa;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
       margin: 0;
-      padding: 15px;
+      padding: 10px;
       direction: rtl;
+      text-align: right;
     }
     .container {
-      max-width: 500px;
-      margin: 0 auto;
+      max-width: 600px;
+      margin: auto;
       background: white;
-      padding: 20px;
-      border-radius: 
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2, h3 {
+      text-align: center;
+      color: #333;
+      font-size: 20px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+      background: #fafafa;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+    }
+    label {
+      font-weight: bold;
+      font-size: 14px;
+    }
+    input, select, button {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+      font-size: 13px;
+    }
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+    .action-btn {
+      padding: 4px 8px;
+      font-size: 12px;
+      margin: 2px;
+      width: auto;
+      display: inline-block;
+    }
+    .btn-edit { background-color: #ffc107; color: black; }
+    .btn-delete { background-color: #dc3545; color: white; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>מעקב ססיות ושעות נוספות</h2>
+
+  <form id="sessionForm">
+    <div>
+      <label for="inputDate">תאריך:</label>
+      <input type="date" id="inputDate" required>
+    </div>
+
+    <div>
+      <label for="inputType">סוג ססיה:</label>
+      <select id="inputType" required>
+        <option value="ע ססיה">ע ססיה</option>
+        <option value="ברכי">ברכי</option>
+        <option value="מסיכות">מסיכות</option>
+        <option value="פרקציות">פרקציות</option>
+        <option value="רדיו כירורגיה">רדיו כירורגיה</option>
+        <option value="סימולציות">סימולציות</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="inputCount">כמות (שעות/מטופלים):</label>
+      <input type="number" step="0.1" id="inputCount" required>
+    </div>
+
+    <div>
+      <label for="inputPartner">שותף/ה לעבודה:</label>
+      <input type="text" id="inputPartner">
+    </div>
+
+    <button type="submit" id="submitBtn">הוסף ססיה</button>
+  </form>
+
+  <h3>רשומות החודש הנוכחי</h3>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>תאריך</th>
+          <th>סוג ססיה</th>
+          <th>כמות</th>
+          <th>שותף/ה</th>
+          <th>פעולות</th>
+        </tr>
+      </thead>
+      <tbody id="recordsTableBody">
+        <!-- הנתונים נטענים לכאן אוטומטית -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  let editingId = null;
+
+  // טעינת נתונים מזיכרון מקומי (או שמירת גיבוי)
+  function getStoredData() {
+    const data = localStorage.getItem('sessions_data');
+    return data ? JSON.parse(data) : {};
+  }
+
+  function saveStoredData(data) {
+    localStorage.setItem('sessions_data', JSON.stringify(data));
+  }
+
+  // בדיקה אם תאריך שייך לחודש הנוכחי
+  function isCurrentMonth(dateStr) {
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    const now = new Date();
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }
+
+  // הצגת הטבלה
+  function loadData() {
+    const tbody = document.getElementById('recordsTableBody');
+    tbody.innerHTML = '';
+    
+    const val = getStoredData();
+    const keys = Object.keys(val);
+    
+    if (keys.length === 0) return;
+
+    keys.forEach(key => {
+      const item = val[key];
+      // סינון הצגה לחודש הנוכחי בלבד
+      if (isCurrentMonth(item.date)) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${item.date}</td>
+          <td>${item.type}</td>
+          <td>${item.count}</td>
+          <td>${item.partner || ''}</td>
+          <td>
+            <button class="action-btn btn-edit" onclick="editRow('${key}', '${item.date}', '${item.type}', ${item.count}, '${item.partner || ''}')">ערוך</button>
+            <button class="action-btn btn-delete" onclick="deleteRow('${key}')">מחק</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
+    });
+  }
+
+  // הוספה או עדכון שורה
+  document.getElementById('sessionForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const dataVal = getStoredData();
+
+    const newData = {
+      date: document.getElementById('inputDate').value,
+      type: document.getElementById('inputType').value,
+      count: parseFloat(document.getElementById('inputCount').value),
+      partner: document.getElementById('inputPartner').value
+    };
+
+    if (editingId) {
+      dataVal[editingId] = newData;
+      editingId = null;
+      document.getElementById('submitBtn').innerText = "הוסף ססיה";
+    } else {
+      const newKey = 'sess_' + Date.now();
+      dataVal[newKey] = newData;
+    }
+
+    saveStoredData(dataVal);
+    document.getElementById('sessionForm').reset();
+    document.getElementById('inputDate').valueAsDate = new Date();
+    loadData();
+  });
+
+  // מחיקת שורה
+  window.deleteRow = function(key) {
+    if (confirm("למחוק שורה זו?")) {
+      const dataVal = getStoredData();
+      delete dataVal[key];
+      saveStoredData(dataVal);
+      loadData();
+    }
+  };
+
+  // עריכת שורה (החזרת הנתונים לטופס)
+  window.editRow = function(key, date, type, count, partner) {
+    editingId = key;
+    document.getElementById('inputDate').value = date;
+    document.getElementById('inputType').value = type;
+    document.getElementById('inputCount').value = count;
+    document.getElementById('inputPartner').value = partner;
+    document.getElementById('submitBtn').innerText = "עדכן שורה";
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // אתחול תאריך ברירת מחדל וטעינת נתונים
+  document.getElementById('inputDate').valueAsDate = new Date();
+  loadData();
+</script>
+
+</body>
+</html>
