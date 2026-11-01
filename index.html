@@ -13,7 +13,7 @@
       font-family: Arial, sans-serif;
       background-color: #f4f4f9;
       margin: 0;
-      padding: 20px;
+      padding: 15px;
       direction: rtl;
       text-align: right;
     }
@@ -25,14 +25,15 @@
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    h2 {
+    h2, h3 {
       text-align: center;
       color: #333;
     }
     form {
-      display: grid;
-      gap: 10px;
-      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 25px;
       background: #fafafa;
       padding: 15px;
       border-radius: 6px;
@@ -40,60 +41,58 @@
     }
     label {
       font-weight: bold;
+      font-size: 14px;
     }
     input, select, button {
       padding: 10px;
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 4px;
+      width: 100%;
+      box-sizing: border-box;
     }
     button {
       background-color: #007bff;
       color: white;
       border: none;
       cursor: pointer;
+      font-weight: bold;
+      margin-top: 5px;
     }
     button:hover {
       background-color: #0056b3;
+    }
+    .table-responsive {
+      overflow-x: auto;
     }
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
+      min-width: 500px;
     }
     th, td {
       border: 1px solid #ddd;
       padding: 10px;
       text-align: center;
+      font-size: 14px;
     }
     th {
       background-color: #007bff;
       color: white;
     }
+    .action-btns {
+      display: flex;
+      gap: 5px;
+      justify-content: center;
+    }
     .action-btns button {
-      padding: 5px 10px;
-      font-size: 14px;
-      margin: 0 2px;
+      padding: 5px 8px;
+      font-size: 12px;
+      margin: 0;
+      width: auto;
     }
     .btn-edit { background-color: #ffc107; color: black; }
+    .btn-edit:hover { background-color: #e0a800; }
     .btn-delete { background-color: #dc3545; }
-  </style>
-</head>
-<body>
-
-<div class="container">
-  <h2>מעקב ססיות ושעות נוספות</h2>
-
-  <!-- טופס הוספה / עריכה -->
-  <form id="sessionForm">
-    <label for="inputDate">תאריך:</label>
-    <input type="date" id="inputDate" required>
-
-    <label for="inputType">סוג ססיה:</label>
-    <select id="inputType" required>
-      <option value="ע ססיה">ע ססיה</option>
-      <option value="ברכי">ברכי</option>
-      <option value="מסיכות">מסיכות</option>
-      <option value="פרקציות">פרקציות</option>
-      <option value="רדיו כירורגיה">רדיו כירורגיה</option>
-      <option value="סימולציות">סי
+    .btn-delete:hover { background-color
